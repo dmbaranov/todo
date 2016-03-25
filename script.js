@@ -34,18 +34,14 @@
 
   ToDo.prototype.onItemClick = function(e) {
     if(e.target.classList.contains('btn-danger')) {
-      var line = e.target.parentNode.parentNode;
-      var index = line.children[0].innerHTML;
-      index = parseInt(index) - 1;
+      var index = e.target.dataset.index - 1;
 
       this.model.splice(index, 1);
       this.updateStorage();
       this.render();
     }
     else if(e.target.classList.contains('btn-info')) {
-      var line = e.target.parentNode.parentNode;
-      var index = line.children[0].innerHTML;
-      index = parseInt(index) - 1;
+      var index = e.target.dataset.index - 1;
 
       var element = this.model[0];
       this.model[0] = this.model[index];
@@ -56,9 +52,9 @@
   }
 
   ToDo.prototype.getItemHtml = function(index, item) {
-    var tmpl = '<tr><th>{{index}}</th><td>{{text}}</td><td><button type="button" class="btn btn-info">&#8593;</button></td><td><button type="button" class="btn btn-danger">x</button></td></tr>'
+    var tmpl = '<tr><th>{{index}}</th><td>{{text}}</td><td><button type="button" data-index={{index}} class="btn btn-info">&#8593;</button></td><td><button type="button" data-index={{index}} class="btn btn-danger">x</button></td></tr>'
 
-    return tmpl.replace('{{index}}', index).replace('{{text}}', item);
+    return tmpl.replace(/{{index}}/g, index).replace(/{{text}}/g, item);
   }
 
   ToDo.prototype.render = function() {
