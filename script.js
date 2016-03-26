@@ -1,3 +1,6 @@
+//if input is empty then button Add should be disabled
+//make sort up/down
+
 (function () {
   var ToDo = function () {
 
@@ -13,7 +16,9 @@
   ToDo.prototype.init = function() {
     this.form.addEventListener('submit', this.addItem.bind(this), false);
     this.todoList.addEventListener('click', this.onItemClick.bind(this), false);
+    this.inputField.addEventListener('keypress', this.changeInputState.bind(this), false);
 
+    document.querySelector('#panel-body__submit').disabled = true;
     this.loadFromStorage();
     this.render();
   }
@@ -33,28 +38,57 @@
   }
 
   ToDo.prototype.onItemClick = function(e) {
-    if(e.target.classList.contains('btn-danger')) {
+    if(e.target.dataset.type == 'remove') {
       var index = e.target.dataset.index - 1;
 
       this.model.splice(index, 1);
       this.updateStorage();
       this.render();
     }
-    else if(e.target.classList.contains('btn-info')) {
+    else if(e.target.dataset.type =='up') {
       var index = e.target.dataset.index - 1;
+      var nextIndex = index - 1;
 
-      var element = this.model[0];
-      this.model[0] = this.model[index];
-      this.model[index] = element;
+      var temp = this.model[index];
+      this.model[index] = this.model[nextIndex];
+      this.model[nextIndex] = temp;
+      this.updateStorage();
+      this.render();
+    }
+    else if(e.target.dataset.type == 'down') {
+      var index = e.target.dataset.index - 1;
+      var nextIndex = index + 1;
+
+      var temp = this.model[index];
+      this.model[index] = this.model[nextIndex];
+      this.model[nextIndex] = temp;
       this.updateStorage();
       this.render();
     }
   }
 
   ToDo.prototype.getItemHtml = function(index, item) {
-    var tmpl = '<tr><th>{{index}}</th><td>{{text}}</td><td><button type="button" data-index={{index}} class="btn btn-info">&#8593;</button></td><td><button type="button" data-index={{index}} class="btn btn-danger">x</button></td></tr>'
+    var isDisabledUp = '', isDisabledDown = '';
 
-    return tmpl.replace(/{{index}}/g, index).replace(/{{text}}/g, item);
+    if(index == 1) {
+      isDisabledDown = 'disabled';
+    }
+    if(index == this.model.length) {
+      isDisabledUp = 'disabled'
+    }
+
+    var tmpl = '<tr><th>{{index}}</th><td>{{text}}</td><td><button type="button" data-type="down" data-index={{index}} class="btn btn-info" {{disUp}}>&#8595;</button></td><td><button type="button" data-type="up"  data-index={{index}} class="btn btn-info" {{disDown}}>&#8593;</button></td><td><button type="button" data-type="remove" data-index={{index}} class="btn btn-danger">x</button></td></tr>'
+
+    return tmpl.replace(/{{index}}/g, index).replace(/{{text}}/g, item).replace(/{{disUp}}/g, isDisabledUp).replace(/{{disDown}}/g, isDisabledDown);
+  }
+
+  ToDo.prototype.changeInputState = function() {
+    if(this.inputField.value.length < 0) {
+      document.querySelector('#panel-body__submit').disabled = true;
+    }
+    else {
+      document.querySelector('#panel-body__submit').disabled = false;
+    }
   }
 
   ToDo.prototype.render = function() {
